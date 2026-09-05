@@ -7,9 +7,10 @@ Description: A Monte Carlo simulation comparing rigid time-blocking against
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt  
 
 class WeeklySimulation:
-    def __init__(self, target_hours=10, liquid_hours=15):
+    def __init__(self, target_hours=10, liquid_hours=12):
         self.target_hours = target_hours
         self.liquid_hours = liquid_hours
         
@@ -72,7 +73,7 @@ class WeeklySimulation:
 
 if __name__ == "__main__":
     print("Initializing Monte Carlo Engine...")
-    sim = WeeklySimulation()
+    sim = WeeklySimulation(target_hours=10, liquid_hours=12) # Stress Test
     shocks = sim.generate_shocks()
     
     rigid_results = sim.run_rigid_calendar(shocks)
@@ -83,3 +84,29 @@ if __name__ == "__main__":
     
     print(f"Rigid Calendar Success Rate: {rigid_success:.2f}%")
     print(f"Event-Driven (Defended) Success Rate: {event_success:.2f}%")
+
+    # --- NEW CHARTING LOGIC ---
+    print("Generating visualization...")
+    
+    # Set up the chart aesthetics
+    labels = ['Rigid Calendar', 'Event-Driven (Defended)']
+    rates = [rigid_success, event_success]
+    colors = ['#FF4C4C', '#00CC99']  # Red for rigid (brittle), Green for event-driven (resilient)
+
+    plt.figure(figsize=(8, 6))
+    bars = plt.bar(labels, rates, color=colors, width=0.5)
+    
+    # Formatting the axes and title
+    plt.ylim(0, 100)
+    plt.ylabel('Probability of Success (%)', fontweight='bold')
+    plt.title('Monte Carlo Simulation: 12-Hour Liquidity Constraint', fontsize=14, fontweight='bold')
+
+    # Add the exact percentages above the bars
+    for bar in bars:
+        yval = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, yval + 1.5, f"{yval:.1f}%", ha='center', va='bottom', fontweight='bold')
+
+    # Save the chart as an image file and then display it
+    plt.savefig('simulation_results.png', dpi=300)
+    print("Chart successfully saved as 'simulation_results.png'.")
+    plt.show()
